@@ -23,6 +23,9 @@ module rooch_framework::transaction_validator {
     use rooch_framework::address_mapping;
     use rooch_framework::account_coin_store;
     use rooch_framework::builtin_validators;
+    use rooch_framework::bitcoin_address;
+    use std::vector;
+    use std::string;
 
     const MAX_U64: u128 = 18446744073709551615;
 
@@ -174,5 +177,37 @@ module rooch_framework::transaction_validator {
             let refund_gas_coin = transaction_fee::withdraw_fee(refund_gas);
             account_coin_store::deposit(gas_payment_account, refund_gas_coin);
         };
+    }
+
+    #[test]
+    fun test_validate_success() {
+        let chain_id = chain_id::chain_id();
+        std::debug::print(&chain_id);
+        let session_validator_id = session_validator::auth_validator_id();
+        std::debug::print(&session_validator_id);
+        // let bitcoin_validator_id = bitcoin_validator::auth_validator_id();
+        let authenticator_payload = vector::empty<u8>();
+        std::debug::print(&authenticator_payload);
+        let tx_validate_result = validate(chain_id, session_validator_id, authenticator_payload);
+        std::debug::print(&tx_validate_result);
+
+        let id = 1;
+        let module_address = @000000000003;
+        let module_name = string::utf8(b"rooch_framework::empty");
+        let expected_auth_validator = auth_validator::new_auth_validator(id, module_address, module_name);
+        std::debug::print(&expected_auth_validator);
+        let expected_session_key = vector::empty<u8>();
+        let expected_bitcoin_addr = bitcoin_address::from_string(&string::utf8(b"bc1p72fvqwm9w4wcsd205maky9qejf6dwa6qeku5f5vnu4phpp3vvpws0p2f4g"));
+        std::debug::print(&expected_bitcoin_addr);
+
+        let auth_validator_id = 1;
+        let auth_validator = option::some(expected_auth_validator);
+        let session_key = option::some(expected_session_key);
+        let bitcoin_address = expected_bitcoin_addr;
+
+        let expected_tx_validate_result = auth_validator::new_tx_validate_result(auth_validator_id, auth_validator, session_key, bitcoin_address);
+        std::debug::print(&expected_tx_validate_result);
+
+        assert!(tx_validate_result == expected_tx_validate_result, 1000);
     }
 }

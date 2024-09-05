@@ -181,7 +181,7 @@ module rooch_framework::transaction_validator {
 
     #[test]
     fun test_validate_success() {
-        let chain_id = chain_id::chain_id();
+        let chain_id = 4;
         std::debug::print(&chain_id);
         let session_validator_id = session_validator::auth_validator_id();
         std::debug::print(&session_validator_id);

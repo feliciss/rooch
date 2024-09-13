@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::binding_test;
+use bitcoin::hex::DisplayHex;
 use move_core_types::account_address::AccountAddress;
 use move_core_types::ident_str;
 use move_core_types::language_storage::ModuleId;
@@ -10,6 +11,7 @@ use move_core_types::vm_status::{AbortLocation, KeptVMStatus, VMStatus};
 use moveos_types::module_binding::MoveFunctionCaller;
 use moveos_types::move_std::string::MoveString;
 use moveos_types::move_types::FunctionId;
+use moveos_types::state::MoveState;
 use moveos_types::{module_binding::ModuleBinding, transaction::MoveAction};
 use rooch_key::keystore::account_keystore::AccountKeystore;
 use rooch_key::keystore::memory_keystore::InMemKeystore;
@@ -44,6 +46,7 @@ async fn test_session_key_rooch() {
     );
     let tx_data = RoochTransactionData::new_for_test(sender, sequence_number, action);
     let tx = keystore.sign_transaction(&sender, tx_data, None).unwrap();
+    println!("{:?}", tx.clone().tx_hash());
     binding_test.execute(tx).unwrap();
 
     let session_key_module =
@@ -56,6 +59,7 @@ async fn test_session_key_rooch() {
     assert_eq!(&session_key.authentication_key, session_auth_key.as_ref());
     assert_eq!(session_key.scopes, vec![session_scope.clone()]);
     assert_eq!(session_key.max_inactive_interval, max_inactive_interval);
+    println!("{:?}", session_key.clone().to_bytes().as_hex());
     keystore.binding_session_key(sender, session_key).unwrap();
 
     // send transaction via session key, it in the scop of session key, so it should success.

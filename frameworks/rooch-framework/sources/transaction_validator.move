@@ -26,6 +26,7 @@ module rooch_framework::transaction_validator {
     use rooch_framework::bitcoin_address;
     use std::vector;
     use std::string;
+    use std::bcs;
 
     const MAX_U64: u128 = 18446744073709551615;
 
@@ -92,7 +93,7 @@ module rooch_framework::transaction_validator {
 
         // Try the built-in auth validator first
         let (bitcoin_address, session_key, auth_validator)= if (auth_validator_id == session_validator::auth_validator_id()){
-            let session_key = session_validator::validate(authenticator_payload);
+            let session_key = session_validator::validate(authenticator_payload); // TODO: check it with test case
             let bitcoin_address = address_mapping::resolve_bitcoin(sender);
             (bitcoin_address, option::some(session_key), option::none())
         }else if (auth_validator_id == bitcoin_validator::auth_validator_id()){
@@ -181,13 +182,29 @@ module rooch_framework::transaction_validator {
 
     #[test]
     fun test_validate_success() {
-        let chain_id = 4;
+        // chain id
+        let chain_id = 3;
         std::debug::print(&chain_id);
+        // auth validator id
         let session_validator_id = session_validator::auth_validator_id();
         std::debug::print(&session_validator_id);
         // let bitcoin_validator_id = bitcoin_validator::auth_validator_id();
         let authenticator_payload = vector::empty<u8>();
         std::debug::print(&authenticator_payload);
+        rooch_framework::genesis::init_for_test();
+
+        // session key
+        let sender_addr = tx_context::sender();
+        let sender = moveos_std::account::create_signer_for_testing(sender_addr);
+        let scope = session_key::new_session_scope(@0x1, std::string::utf8(b"*"), std::string::utf8(b"*"));
+        let authentication_key = bcs::to_bytes(&sender_addr);
+        let max_inactive_interval = 10;
+        let app_name = std::string::utf8(b"test");
+        let app_url = std::string::utf8(b"https://test.rooch.network");
+        session_key::create_session_key(&sender, app_name, app_url,  authentication_key, vector::singleton(scope), max_inactive_interval);
+
+        // validate function
+        // TODO: let scheme = vector::borrow(authenticator_payload, 0);
         let tx_validate_result = validate(chain_id, session_validator_id, authenticator_payload);
         std::debug::print(&tx_validate_result);
 

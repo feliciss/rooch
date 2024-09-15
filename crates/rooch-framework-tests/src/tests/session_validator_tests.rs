@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::binding_test;
-use bitcoin::hex::DisplayHex;
 use move_core_types::account_address::AccountAddress;
 use move_core_types::ident_str;
 use move_core_types::language_storage::ModuleId;
@@ -11,7 +10,6 @@ use move_core_types::vm_status::{AbortLocation, KeptVMStatus, VMStatus};
 use moveos_types::module_binding::MoveFunctionCaller;
 use moveos_types::move_std::string::MoveString;
 use moveos_types::move_types::FunctionId;
-use moveos_types::state::MoveState;
 use moveos_types::{module_binding::ModuleBinding, transaction::MoveAction};
 use rooch_key::keystore::account_keystore::AccountKeystore;
 use rooch_key::keystore::memory_keystore::InMemKeystore;

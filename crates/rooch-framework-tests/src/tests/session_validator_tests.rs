@@ -46,7 +46,6 @@ async fn test_session_key_rooch() {
     );
     let tx_data = RoochTransactionData::new_for_test(sender, sequence_number, action);
     let tx = keystore.sign_transaction(&sender, tx_data, None).unwrap();
-    println!("{:?}", tx.clone().tx_hash());
     binding_test.execute(tx).unwrap();
 
     let session_key_module =
@@ -59,7 +58,6 @@ async fn test_session_key_rooch() {
     assert_eq!(&session_key.authentication_key, session_auth_key.as_ref());
     assert_eq!(session_key.scopes, vec![session_scope.clone()]);
     assert_eq!(session_key.max_inactive_interval, max_inactive_interval);
-    println!("{:?}", session_key.clone().to_bytes().as_hex());
     keystore.binding_session_key(sender, session_key).unwrap();
 
     // send transaction via session key, it in the scop of session key, so it should success.
@@ -69,6 +67,8 @@ async fn test_session_key_rooch() {
     let tx = keystore
         .sign_transaction_via_session_key(&sender, tx_data, &session_auth_key, None)
         .unwrap();
+    println!("tx hash: {:?}", hex::encode(tx.clone().tx_hash().0));
+    println!("authenticator payload: {:?}", hex::encode(tx.clone().authenticator.payload));
 
     binding_test.execute(tx).unwrap();
 
